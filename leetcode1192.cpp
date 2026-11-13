@@ -1,40 +1,39 @@
 class Solution {
+public:
     vector<int> depth;
     vector<vector<int>> adj, ans;
-
-public:
     int dfs(int node, int parent, int time) {
         depth[node] = time;
+        int low = time;
         for (int& v : adj[node]) {
             if (v == parent)
-                continue; // this means that we're going to the parent of node
-                          // that is v
-
-            if (depth[v] == -1) {
+                continue; // sine humein wapis parent pe nahi jana hai
+            // ek node ko hum 2 condition mein divide karenge, pehela, visited
+            // nahi hona chahiye, dusra , agar visited hai toh vo parent nahi
+            // hai matlab jis node pe hum jane wale hai vo ek cycle ka part hai
+            if (depth[v] == -1) { // agar visited nahi hai toh
                 int value = dfs(v, node, time + 1);
-                if (value > time)
+                if (time < value) {
                     ans.push_back({v, node});
-                time = min(time, value);
-
+                }
+                low = min(low, value);
             } else {
-                time = min(time,
-                           depth[v]); // already visited node so we'll take the
-                                      // min of the low and the depth of v
+                low = min(low, depth[v]);
             }
         }
-        return time;
+        return low;
     }
     vector<vector<int>> criticalConnections(int n,
                                             vector<vector<int>>& connections) {
         depth.resize(n, -1);
         adj.resize(n, {});
-        for (auto& connection : connections) {
-            int u = connection[0];
-            int v = connection[1];
+        for (auto& conn : connections) {
+            int u = conn[0];
+            int v = conn[1];
             adj[u].push_back(v);
             adj[v].push_back(u);
         }
-        dfs(0, -1, 0); // source, parent, depth/time
+        dfs(0, -1, 0); // source, parent, time
         return ans;
     }
 };
